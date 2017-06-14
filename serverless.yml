@@ -1,7 +1,4 @@
-service: microservice-template
-
-plugins:
-  - sentry-serverless-plugin
+service: suspicious-serverless
 
 provider:
   name: aws
@@ -12,9 +9,10 @@ package:
   artifact: dst.zip
 
 functions:
-  hello:
-    handler: handlers.hello
+  api:
+    handler: api.handler
+    timeout: 60
     events:
       - http:
-          path: hello
-          method: get
+          path: /{proxy+}
+          method: any

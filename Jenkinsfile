@@ -17,11 +17,27 @@ node(label: 'Small') {
         sh 'npm run test'
       }
 
-      // if (IS_MASTER_BUILD) {
-      //   stage('deploy:prod') {
-      //     sh 'npm run deploy:prod'
-      //   }
-      // }
+      if (IS_MASTER_BUILD) {
+        withCredentials([
+          [
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: 'jenkins iam',
+            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+          ]
+        ]) {
+          env.AWS_DEFAULT_REGION = 'us-east-1'
+          stage('deploy:stage') {
+            sh 'npm run deploy -- --stage=stage --region=ap-northeast-2'
+            sh 'npm run deploy -- --stage=stage'
+          }
+
+          stage('deploy:prod') {
+            sh 'npm run deploy -- --stage=prod --region=ap-northeast-2'
+            sh 'npm run deploy -- --stage=prod'
+          }
+        }
+      }
     }
   }
 }

@@ -38,7 +38,7 @@
     "typescript": "2.3.4"
   },
   "dependencies": {
-    "linkify-it": "^2.0.3",
+    "linkify-it": "2.0.3",
     "lodash": "^4.17.4",
     "raven": "1.1.1",
     "request": "^2.81.0",

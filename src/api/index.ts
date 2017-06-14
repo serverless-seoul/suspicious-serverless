@@ -10,6 +10,7 @@ const router = new Router([
         title: "Vingle suspicious content analysis API",
         version: "1.0.0",
       },
+      schemas: ['https'],
       host: "www.vingle.net",
       basePath: "/",
     },

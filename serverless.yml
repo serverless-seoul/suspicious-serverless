@@ -11,6 +11,7 @@ package:
 functions:
   api:
     handler: api.handler
+    timeout: 60
     events:
       - http:
           path: /{proxy+}

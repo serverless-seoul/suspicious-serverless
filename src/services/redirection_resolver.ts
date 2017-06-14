@@ -42,7 +42,7 @@ export default class RedirectionResolver {
         req.abort(); // stop receiving response body
 
         if (res.statusCode! >= 300 && res.statusCode! < 400) {
-          resolve(URL.resolve(url, res.headers['location']));
+          return resolve(URL.resolve(url, res.headers['location']));
         }
 
         resolve();

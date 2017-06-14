@@ -21,7 +21,6 @@
     "@types/chai": "3.4.34",
     "@types/chai-as-promised": "0.0.29",
     "@types/cli-color": "0.3.29",
-    "@types/linkify-it": "^2.0.1",
     "@types/lodash": "^4.14.65",
     "@types/mocha": "2.2.32",
     "@types/nock": "^8.2.1",

@@ -1,6 +1,7 @@
-import { Router, SwaggerRoute } from "vingle-corgi";
+import { Router, Namespace, SwaggerRoute } from "vingle-corgi";
 
 import { routes } from "./routes";
+
 const router = new Router([
   new SwaggerRoute(
     "/swagger",
@@ -10,6 +11,10 @@ const router = new Router([
     },
     routes,
   ),
+
+  new Namespace("", {
+    children: routes,
+  }),
 ]);
 
 export const handler = router.handler();

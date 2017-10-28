@@ -14,7 +14,7 @@ export const routes: Routes = [
       desc: "List of redirection chain urls",
       operationId: "getRedirectionChain",
     }, {
-      url: Parameter.Query(Joi.string()),
+      url: Parameter.Query(Joi.string().required()),
     },
     async function(this: RoutingContext) {
       const url = this.params.url as string;

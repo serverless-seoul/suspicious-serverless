@@ -1,17 +1,19 @@
 import {
-  Route,
-  RoutingContext,
-  Routes,
   Parameter,
-} from 'vingle-corgi';
+  Route,
+  Routes,
+  RoutingContext,
+} from "vingle-corgi";
 
-import * as Joi from 'joi';
-import RedirectionResolver from '../../services/redirection_resolver';
+import * as Joi from "joi";
+import RedirectionResolver from "../../services/redirection_resolver";
 
 export const routes: Routes = [
   Route.GET(
-    '/redirection-chain', 'List of redirection chain urls',
-    {
+    "/redirection-chain", {
+      desc: "List of redirection chain urls",
+      operationId: "getRedirectionChain",
+    }, {
       url: Parameter.Query(Joi.string()),
     },
     async function(this: RoutingContext) {

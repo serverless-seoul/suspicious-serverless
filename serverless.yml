@@ -5,8 +5,8 @@ provider:
   runtime: nodejs6.10
   stage: prod
 
-package:
-  artifact: dst.zip
+plugins:
+  - serverless-webpack
 
 functions:
   api:

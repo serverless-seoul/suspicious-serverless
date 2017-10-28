@@ -4,14 +4,14 @@
   "description": "Serverless based suspicious content analysis API",
   "main": "index.js",
   "scripts": {
-    "build": "rm -Rf dst && tsc && cd src && find . -name '*.json' -type f -exec cp {} ../dst/{} \\; && cd ..",
-    "pack": "rm -f dst.zip && cp package.json dst/package.json && (cp .npmrc dst/.npmrc || true) && cd dst && npm install --cache=./.npm --production && zip -r ../dst.zip . ** && cd ..",
     "pretest": "rm -Rf dst && tsc -p ./tsconfig.test.json && cd src && find . -name '*.json' -type f -exec cp {} ../dst/{} \\; && cd ..",
+    "test": "mocha -t 20000 dst/**/__test__/**/*.js",
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
-    "test": "mocha -t 30000 dst/**/__test__/**/*.js",
-    "invoke": "npm run pretest && node scripts/invoke.js",
-    "deploy": "npm run pretest && npm run pack && serverless deploy",
-    "start": "npm run invoke -- -f hello -e ./src/handlers/hello/__test__/mock_event.json"
+    "deploy": "serverless deploy",
+    "deploy:stage": "npm run deploy -- -s stage",
+    "deploy:prod": "npm run deploy -- -s prod",
+    "info:stage": "sls info -s stage",
+    "info:prod": "sls info -s prod"
   },
   "engines": {
     "node": "6.10.*"
@@ -22,6 +22,7 @@
     "@types/chai": "3.4.34",
     "@types/chai-as-promised": "0.0.29",
     "@types/cli-color": "0.3.29",
+    "@types/debug": "0.0.30",
     "@types/lodash": "^4.14.65",
     "@types/mocha": "2.2.32",
     "@types/nock": "^8.2.1",
@@ -30,17 +31,21 @@
     "chai": "3.5.0",
     "chai-as-promised": "6.0.0",
     "cli-color": "1.1.0",
+    "json-loader": "^0.5.7",
     "lodash": "4.17.4",
     "mocha": "3.1.2",
     "nock": "^9.0.13",
     "optimist": "0.6.1",
     "sentry-api": "0.1.1",
     "serverless": "1.6.0",
+    "serverless-webpack": "2.0.0",
     "ts-loader": "^2.3.7",
     "tslint": "5.4.3",
     "typescript": "2.4.2",
+    "webpack": "^1.15.0"
   },
   "dependencies": {
+    "debug": "^3.1.0",
     "linkify-it": "2.0.3",
     "lodash": "^4.17.4",
     "raven": "1.1.1",

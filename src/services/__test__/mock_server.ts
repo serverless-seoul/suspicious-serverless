@@ -1,11 +1,10 @@
 import * as http from "http";
 import * as qs from "querystring";
 
-
 export const server = http.createServer((req, res) => {
   if (req.url === "/redirection/http") {
     res.writeHead(302, {
-      "Location": `/?${qs.stringify({ from: req.url })}`,
+      Location: `/?${qs.stringify({ from: req.url })}`,
     });
     res.end();
     return;

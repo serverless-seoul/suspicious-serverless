@@ -1,4 +1,4 @@
-import { Router, Namespace, SwaggerRoute } from "vingle-corgi";
+import { Namespace, Router, SwaggerRoute } from "vingle-corgi";
 
 import { routes } from "./routes";
 

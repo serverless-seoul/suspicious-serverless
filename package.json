@@ -19,6 +19,7 @@
   "author": "MooYeol Lee <mooyoul@gmail.com>",
   "license": "ISC",
   "devDependencies": {
+    "@types/bluebird": "^3.5.17",
     "@types/chai": "3.4.34",
     "@types/chai-as-promised": "0.0.29",
     "@types/cli-color": "0.3.29",
@@ -47,6 +48,7 @@
   },
   "dependencies": {
     "@serverless-chrome/lambda": "^1.0.0-6",
+    "bluebird": "^3.5.1",
     "debug": "^3.1.0",
     "linkify-it": "2.0.3",
     "lodash": "^4.17.4",

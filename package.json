@@ -42,7 +42,7 @@
     "ts-loader": "^2.3.7",
     "tslint": "5.4.3",
     "typescript": "2.4.2",
-    "webpack": "^1.15.0"
+    "webpack": "^3.8.1"
   },
   "dependencies": {
     "debug": "^3.1.0",

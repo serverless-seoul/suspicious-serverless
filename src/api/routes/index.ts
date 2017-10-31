@@ -6,7 +6,7 @@ import {
 } from "vingle-corgi";
 
 import * as Joi from "joi";
-import RedirectionResolver from "../../services/redirection_resolver";
+import { RedirectionResolver } from "../../services/redirection_resolver";
 
 export const routes: Routes = [
   Route.GET(
@@ -15,8 +15,7 @@ export const routes: Routes = [
       operationId: "getRedirectionChain",
     }, {
       url: Parameter.Query(Joi.string().required()),
-    },
-    async function(this: RoutingContext) {
+    }, async function(this: RoutingContext) {
       const url = this.params.url as string;
 
       const resolver = new RedirectionResolver();
@@ -24,5 +23,6 @@ export const routes: Routes = [
       return this.json({
         data: await resolver.resolve(url),
       });
-    }),
+    },
+  ),
 ];

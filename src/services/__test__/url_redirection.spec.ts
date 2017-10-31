@@ -6,7 +6,7 @@ chai.use(chaiAsPromised);
 // chai.should();
 const expect = chai.expect;
 
-import RedirectionResolver from "../redirection_resolver";
+import { RedirectionResolver } from "../redirection_resolver";
 
 describe("RedirectionResolver", () => {
   beforeEach(() => {

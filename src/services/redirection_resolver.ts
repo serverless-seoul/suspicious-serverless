@@ -19,7 +19,7 @@ function linkifyMatch(text: string) {
   }
 }
 
-export default class RedirectionResolver {
+export class RedirectionResolver {
   constructor(
     private timeout: number = 5000,
     // tslint:disable-next-line

@@ -1,5 +1,6 @@
 import * as chai from "chai";
 import * as chaiAsPromised from "chai-as-promised";
+import * as sinon from "sinon";
 chai.use(chaiAsPromised);
 chai.should();
 
@@ -7,6 +8,8 @@ const { expect } = chai;
 
 import { Namespace, Router } from "vingle-corgi";
 import { routes } from "../routes";
+
+import { RedirectionResolver } from "../../services/redirection_resolver";
 
 describe("API Handler", () => {
   let router: Router;
@@ -19,6 +22,21 @@ describe("API Handler", () => {
   });
 
   describe("GET /redirection-chain", () => {
+    const sandbox = sinon.sandbox.create();
+
+    beforeEach(() => {
+      sandbox.stub(RedirectionResolver.prototype, "resolve")
+        .withArgs("http://bit.ly/2siha2e")
+        .returns([
+          "http://bit.ly/2siha2e",
+          "https://www.vingle.net/",
+        ]);
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
     it("should return redirection urls", async () => {
       const res = await router.resolve({
         path: "/redirection-chain",

@@ -8,6 +8,9 @@ provider:
 plugins:
   - serverless-webpack
 
+custom:
+  webpackIncludeModules: true
+
 functions:
   api:
     handler: api.handler

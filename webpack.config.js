@@ -22,6 +22,9 @@ module.exports = {
     ]
   },
   externals: [
-    'aws-sdk'
+    'aws-sdk',
+    // @note `@serverless-chrome/lambda` package has extra built chromium binary,
+    // which is specially to be handled
+    '@serverless-chrome/lambda'
   ]
 };

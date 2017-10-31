@@ -37,6 +37,7 @@ export const routes: Routes = [
 
       // We can't re-use chrome instance now because currently serverless-chrome is not stable.
       // launching new chrome process will cause additional processing time (approx. 600ms)
+      // @see https://github.com/adieuadieu/serverless-chrome/issues/41
       const dispatcher = new ContentDispatcher(!!process.env.DISABLE_SERVERLESS_CHROME);
 
       await dispatcher.launch();

@@ -4,6 +4,11 @@ module.exports = {
   entry: './src/api',
   target: 'node',
   resolve: {
+    alias: {
+      // @note This alias is required if building service on Node.js > v6,
+      // because webpack tree shaking drops built-in runtime check logic in puppeteer package
+      "puppeteer": require.resolve("puppeteer/node6/Puppeteer")
+    },
     extensions: [
       '.js',
       '.json',

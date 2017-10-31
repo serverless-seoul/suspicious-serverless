@@ -28,6 +28,7 @@
     "@types/mocha": "2.2.32",
     "@types/nock": "^8.2.1",
     "@types/node": "6.0.52",
+    "@types/puppeteer": "^0.12.1",
     "@types/request": "^2.0.7",
     "@types/sinon": "^2.3.7",
     "chai": "3.5.0",
@@ -52,6 +53,7 @@
     "debug": "^3.1.0",
     "linkify-it": "2.0.3",
     "lodash": "^4.17.4",
+    "puppeteer": "^0.10.2",
     "raven": "1.1.1",
     "request": "^2.83.0",
     "vingle-corgi": "^1.5.0-beta.3"

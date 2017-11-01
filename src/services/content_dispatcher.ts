@@ -54,6 +54,7 @@ export class ContentDispatcher {
 
     // by default, puppeteer waits for load event.
     this.log("got loaded event from", url);
+    lastNavigatedAt = Date.now();
 
     // this logic waits additional time after last document requested (if specified),
     // to detect javascript-based navigation requests
@@ -67,7 +68,7 @@ export class ContentDispatcher {
             clearInterval(tid);
             resolve();
           }
-        }, 1000);
+        }, 100);
       });
     }
 

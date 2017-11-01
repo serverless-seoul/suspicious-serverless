@@ -107,6 +107,7 @@ export class ContentDispatcher {
         this.log("failed to receive response from instance: ", e.stack);
         this.log("re-launching...");
         await this.shutdown();
+        this.slsChrome = null;
       }
     }
 

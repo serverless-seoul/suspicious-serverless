@@ -48,8 +48,6 @@ export class ContentDispatcher {
         navigatedUrls.push(navigatedUrl);
       }
     });
-    // await page.goto('https://t.co/9XYeM5h7a5');
-    // await page.goto('https://anonym.to/?http://www.naver.com');
     this.log("navigating to ", url);
 
     await page.goto(url);

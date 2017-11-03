@@ -5,13 +5,16 @@ provider:
   runtime: nodejs6.10
   stage: prod
 
-package:
-  artifact: dst.zip
+plugins:
+  - serverless-webpack
+
+custom:
+  webpackIncludeModules: true
 
 functions:
   api:
     handler: api.handler
-    timeout: 60
+    timeout: 120
     events:
       - http:
           path: /{proxy+}

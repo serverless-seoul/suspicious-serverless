@@ -4,9 +4,6 @@ provider:
   name: aws
   runtime: nodejs6.10
   stage: prod
-  environment:
-    DEBUG: "suspicious-serverless:*"
-#    DEBUG: "suspicious-serverless:*,puppeteer:*"
 
 plugins:
   - serverless-webpack

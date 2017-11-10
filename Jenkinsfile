@@ -13,7 +13,9 @@ node(label: 'Small') {
         }
 
         stage('Check Dependencies') {
-          sh 'npm install --cache=./.npm --quiet'
+          env.npm_config_cache = "./npm"
+
+          sh 'npm install --quiet'
         }
 
         stage('Lint') {

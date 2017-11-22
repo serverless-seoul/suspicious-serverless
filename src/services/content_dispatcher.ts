@@ -48,6 +48,12 @@ export class ContentDispatcher {
         navigatedUrls.push(navigatedUrl);
       }
     });
+
+    page.on("dialog", async (dialog) => {
+      this.log("got dialog (type: %s, message: %s)", dialog.type, dialog.message());
+      await dialog.dismiss();
+    });
+
     this.log("navigating to ", url);
 
     await page.goto(url);

@@ -38,6 +38,23 @@ export class ContentDispatcher {
 
     this.log("created new page");
 
+    await page.setRequestInterceptionEnabled(true);
+
+    page.on("request", (interceptedRequest) => {
+      switch (interceptedRequest.resourceType) {
+        case "Image":
+        case "Media":
+        case "Font": {
+          interceptedRequest.abort();
+          break;
+        }
+        default: {
+          interceptedRequest.continue();
+          break;
+        }
+      }
+    });
+
     page.on("framenavigated", (frame: puppeteer.Frame) => {
       if (frame === mainFrame) {
         const navigatedUrl = frame.url();
@@ -48,6 +65,12 @@ export class ContentDispatcher {
         navigatedUrls.push(navigatedUrl);
       }
     });
+
+    page.on("dialog", async (dialog) => {
+      this.log("got dialog (type: %s, message: %s)", dialog.type, dialog.message());
+      await dialog.dismiss();
+    });
+
     this.log("navigating to ", url);
 
     await page.goto(url);

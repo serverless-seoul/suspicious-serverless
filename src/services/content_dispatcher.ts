@@ -11,7 +11,10 @@ export interface Content {
 }
 
 export class ContentDispatcher {
-  private LOG_TAG = "suspicious-serverless:content-dispatcher";
+  private readonly LOG_TAG = "suspicious-serverless:content-dispatcher";
+  // @note starting puppeteer v0.12.0, timeout can be disabled if timeout is zero (0).
+  private readonly NAVIGATION_TIMEOUT = 30 * 1000; // in milliseconds
+
   private browser: puppeteer.Browser | null = null;
   private slsChrome: {
     kill: () => Promise<void>;
@@ -73,7 +76,14 @@ export class ContentDispatcher {
 
     this.log("navigating to ", url);
 
-    await page.goto(url);
+    try {
+      await page.goto(url, { timeout: this.NAVIGATION_TIMEOUT });
+    } catch (e) {
+      return {
+        navigatedUrls,
+        html: "",
+      };
+    }
 
     // by default, puppeteer waits for load event.
     this.log("got loaded event from", url);

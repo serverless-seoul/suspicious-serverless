@@ -41,8 +41,8 @@ export class ContentDispatcher {
 
     this.log("created new page");
 
+    // setup request interceptor
     await page.setRequestInterceptionEnabled(true);
-
     page.on("request", (interceptedRequest) => {
       switch (interceptedRequest.resourceType) {
         case "Image":

@@ -15,6 +15,10 @@ export class ContentDispatcher {
   // @note starting puppeteer v0.12.0, timeout can be disabled if timeout is zero (0).
   private readonly NAVIGATION_TIMEOUT = 30 * 1000; // in milliseconds
 
+  // tslint:disable-next-line
+  private readonly DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36";
+  private readonly DEFAULT_PLATFORM = "Win32";
+
   private browser: puppeteer.Browser | null = null;
   private slsChrome: {
     kill: () => Promise<void>;
@@ -57,6 +61,19 @@ export class ContentDispatcher {
         }
       }
     });
+
+    // setup environment
+    await page.evaluateOnNewDocument((platform) => {
+      // this function will be evaluated in browser context
+      Object.defineProperties(navigator, {
+        // overwrite the `platform` property to use a custom getter
+        platform: {
+          get() {
+            return platform;
+          },
+        },
+      });
+    }, this.DEFAULT_PLATFORM);
 
     page.on("framenavigated", (frame: puppeteer.Frame) => {
       if (frame === mainFrame) {
@@ -144,12 +161,20 @@ export class ContentDispatcher {
       }
     }
 
+    const ADDITIONAL_CHROME_FLAGS = [
+      `--user-agent="${this.DEFAULT_USER_AGENT}"`,
+    ];
+
     if (this.disableServerlessChrome) { // local or test environment
       this.log("DISABLE_SERVERLESS_CHROME is set, launching bundled chrome!");
-      this.browser = await puppeteer.launch();
+      this.browser = await puppeteer.launch({
+        args: ADDITIONAL_CHROME_FLAGS,
+      });
     } else { // in lambda runtime
       this.log("launching serverless-chrome instance");
-      const chrome = await launchChrome();
+      const chrome = await launchChrome({
+        flags: ADDITIONAL_CHROME_FLAGS,
+      });
       this.log("chrome: ", chrome);
 
       this.log("getting debugger url from %s", chrome.url);

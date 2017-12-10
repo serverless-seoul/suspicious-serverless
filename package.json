@@ -48,12 +48,12 @@
     "webpack": "^3.8.1"
   },
   "dependencies": {
-    "@serverless-chrome/lambda": "^1.0.0-6",
+    "@serverless-chrome/lambda": "1.0.0-7",
     "bluebird": "^3.5.1",
     "debug": "^3.1.0",
     "linkify-it": "2.0.3",
     "lodash": "^4.17.4",
-    "puppeteer": "^0.10.2",
+    "puppeteer": "0.10.2",
     "raven": "1.1.1",
     "request": "^2.83.0",
     "vingle-corgi": "^1.5.0-beta.3"

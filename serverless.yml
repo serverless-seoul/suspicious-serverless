@@ -4,6 +4,7 @@ provider:
   name: aws
   runtime: nodejs8.10
   stage: prod
+  logRetentionInDays: 30
 
 plugins:
   - serverless-webpack

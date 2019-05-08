@@ -9,7 +9,10 @@ plugins:
   - serverless-webpack
 
 custom:
-  webpackIncludeModules: true
+  webpack:
+    includeModules:
+      forceExclude:
+        - aws-sdk
 
 functions:
   api:

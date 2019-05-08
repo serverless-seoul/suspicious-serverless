@@ -1,18 +1,12 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "target": "es6",
+        "target": "es2017",
         "noImplicitAny": true,
-        "sourceMap": true,
-        "outDir": "dst",
         "strictNullChecks": true,
         "experimentalDecorators": true,
-        "emitDecoratorMetadata": true
-    },
-    "exclude": [
-        "**/__test__/"
-    ],
-    "include": [
-        "src/**/*"
-    ]
+        "emitDecoratorMetadata": true,
+        "noUnusedLocals": true,
+        "resolveJsonModule": true
+    }
 }

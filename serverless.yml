@@ -7,12 +7,17 @@ provider:
 
 plugins:
   - serverless-webpack
+  - serverless-prune-plugin
+  - "@vingle/serverless-tag-plugin"
 
 custom:
   webpack:
     includeModules:
       forceExclude:
         - aws-sdk
+    prune:
+      automatic: true
+      number: 5
 
 functions:
   api:

@@ -4,8 +4,8 @@ IS_MASTER_BUILD = (env.BRANCH_NAME == MAIN_BRANCH)
 node(label: 'Small') {
   catchError {
     withDockerRegistry(registry: [credentialsId: 'docker-hub', url: 'https://index.docker.io/v1/']) {
-      docker.image('vingle/lambda-microservice-template:chrome').pull()
-      withDockerContainer([image: 'vingle/lambda-microservice-template:chrome']) {
+      docker.image('vingle/lambda-microservice-template:nodejs8.10').pull()
+      withDockerContainer([image: 'vingle/lambda-microservice-template:nodejs8.10']) {
         stage('Checkout SCM') {
           checkout scm
 

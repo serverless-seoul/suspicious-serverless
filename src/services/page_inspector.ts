@@ -3,15 +3,15 @@ import * as debug from "debug";
 import * as puppeteer from "puppeteer";
 import * as request from "request";
 
-import { launchChrome } from "./serverless_chrome";
+import launchChrome, { LaunchedChrome } from "./serverless-chrome";
 
 export interface Content {
   navigatedUrls: string[];
   html: string;
 }
 
-export class ContentDispatcher {
-  private readonly LOG_TAG = "suspicious-serverless:content-dispatcher";
+export class PageInspector {
+  private readonly LOG_TAG = "suspicious-serverless:page-inspector";
   // @note starting puppeteer v0.12.0, timeout can be disabled if timeout is zero (0).
   private readonly NAVIGATION_TIMEOUT = 30 * 1000; // in milliseconds
 
@@ -20,9 +20,7 @@ export class ContentDispatcher {
   private readonly DEFAULT_PLATFORM = "Win32";
 
   private browser: puppeteer.Browser | null = null;
-  private slsChrome: {
-    kill: () => Promise<void>;
-  } | null = null;
+  private slsChrome: LaunchedChrome | null = null;
 
   private log = debug(this.LOG_TAG);
 
@@ -30,7 +28,7 @@ export class ContentDispatcher {
     private disableServerlessChrome = false,
   ) {}
 
-  public async dispatch(url: string, wait: number = 0): Promise<Content> {
+  public async inspect(url: string, wait: number = 0): Promise<Content> {
     if (!this.browser) {
       throw new Error("browser not found");
     }
@@ -46,12 +44,14 @@ export class ContentDispatcher {
     this.log("created new page");
 
     // setup request interceptor
-    await page.setRequestInterceptionEnabled(true);
-    page.on("request", (interceptedRequest) => {
-      switch (interceptedRequest.resourceType) {
-        case "Image":
-        case "Media":
-        case "Font": {
+    await page.setRequestInterception(true);
+    page.on("request", async (interceptedRequest) => {
+      const resourceType = interceptedRequest.resourceType();
+
+      switch (resourceType) {
+        case "image":
+        case "media":
+        case "font": {
           interceptedRequest.abort();
           break;
         }

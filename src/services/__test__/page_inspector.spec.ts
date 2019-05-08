@@ -1,21 +1,20 @@
-import * as chai from "chai";
-import * as chaiAsPromised from "chai-as-promised";
+import { expect } from "chai";
 import * as nock from "nock";
-import * as sinon from "sinon";
-chai.use(chaiAsPromised);
-const expect = chai.expect;
 
 import * as puppeteer from "puppeteer";
 import * as qs from "qs";
+import { sandbox } from "../../__test__/helper";
 import { server as mockServer } from "./mock_server";
 
-import { ContentDispatcher } from "../content_dispatcher";
-import * as serverlessChrome from "../serverless_chrome";
+import { PageInspector } from "../page_inspector";
+import * as serverlessChrome from "../serverless-chrome";
 
 const MOCK_SERVER_PORT = 3001;
 const MOCK_SERVER_BASE_URL = `http://127.0.0.1:${MOCK_SERVER_PORT}`;
 
-describe("ContentDispatcher", () => {
+describe(PageInspector.name, () => {
+  let inspector: PageInspector;
+
   before(async () => {
     await new Promise((resolve) => {
       mockServer.listen(MOCK_SERVER_PORT, resolve);
@@ -28,72 +27,59 @@ describe("ContentDispatcher", () => {
     });
   });
 
+  beforeEach(async () => {
+    inspector = new PageInspector(true);
+  });
+
   describe("#launch", () => {
-    let sandbox: sinon.SinonSandbox;
-
-    beforeEach(() => {
-      sandbox = sinon.sandbox.create();
-    });
-
-    afterEach(() => {
-      sandbox.restore();
-    });
-
     context("when browser already exists", () => {
-      let dispatcher: ContentDispatcher;
-
       let puppeteerLaunchStub: sinon.SinonStub;
-      let dispatcherShutdownStub: sinon.SinonStub;
+      let inspectorShutdownStub: sinon.SinonStub;
 
       beforeEach(async () => {
-        dispatcher = new ContentDispatcher(true);
+        puppeteerLaunchStub = sandbox.stub(puppeteer, "launch");
+        inspectorShutdownStub = sandbox.stub(inspector, "shutdown").resolves();
 
-        puppeteerLaunchStub = sandbox.stub(puppeteer, "launch").resolves({});
-        dispatcherShutdownStub = sandbox.stub(dispatcher, "shutdown").resolves();
-
-        await dispatcher.launch();
+        await inspector.launch();
       });
 
       it("should re-use chrome instance if available", async () => {
-        sandbox.stub((dispatcher as any), "browser").value({
+        sandbox.stub((inspector as any), "browser").value({
           version: sandbox.stub().resolves("Chrome/12.34.56"),
         });
 
-        await dispatcher.launch();
+        await inspector.launch();
 
         expect(puppeteerLaunchStub.callCount).to.be.eq(1);
       });
 
       it("should shutdown previous chrome instance if not available", async () => {
-        sandbox.stub((dispatcher as any), "browser").value({
+        sandbox.stub((inspector as any), "browser").value({
           version: sandbox.stub().rejects(new Error("foo")),
           close: sandbox.stub().resolves(),
         });
 
-        await dispatcher.launch();
+        await inspector.launch();
 
         expect(puppeteerLaunchStub.callCount).to.be.eq(2);
-        expect(dispatcherShutdownStub.callCount).to.be.eq(1);
+        expect(inspectorShutdownStub.callCount).to.be.eq(1);
       });
     });
 
     context("when serverless-chrome disabled", () => {
-      let dispatcher: ContentDispatcher;
       let puppeteerLaunchStub: sinon.SinonStub;
 
       beforeEach(async () => {
-        dispatcher = new ContentDispatcher(true);
-        puppeteerLaunchStub = sandbox.stub(puppeteer, "launch").resolves({});
+        puppeteerLaunchStub = sandbox.stub(puppeteer, "launch").resolves();
       });
 
       it("should launch puppeteer bundled chromium instance", async () => {
-        await dispatcher.launch();
+        await inspector.launch();
         expect(puppeteerLaunchStub.called).to.be.eq(true);
       });
     });
 
     context("when serverless-chrome enabled", () => {
-      let dispatcher: ContentDispatcher;
       let launchChromeStub: sinon.SinonStub;
       let getDebuggerUrlStub: sinon.SinonStub;
       let puppeteerConnectStub: sinon.SinonStub;
@@ -102,17 +88,16 @@ describe("ContentDispatcher", () => {
       const MOCK_DEBUGGER_WS_ENDPOINT = "ws://127.0.0.1:54321/devtools/browser/12345678";
 
       beforeEach(async () => {
-        dispatcher = new ContentDispatcher();
-
-        launchChromeStub = sandbox.stub(serverlessChrome, "launchChrome").resolves({
-          url: MOCK_DEBUGGER_BASE_URL,
-        });
-        getDebuggerUrlStub = sandbox.stub(dispatcher as any, "getDebuggerUrl").resolves(MOCK_DEBUGGER_WS_ENDPOINT);
-        puppeteerConnectStub = sandbox.stub(puppeteer, "connect").resolves({});
+        inspector = new PageInspector();
+        launchChromeStub = sandbox.stub(serverlessChrome, "default")
+          .resolves({ url: MOCK_DEBUGGER_BASE_URL } as any);
+        getDebuggerUrlStub = sandbox.stub(inspector as any, "getDebuggerUrl")
+          .resolves(MOCK_DEBUGGER_WS_ENDPOINT as any);
+        puppeteerConnectStub = sandbox.stub(puppeteer, "connect");
       });
 
       it("should launch puppeteer bundled chromium instance", async () => {
-        await dispatcher.launch();
+        await inspector.launch();
         expect(launchChromeStub.called).to.be.eq(true);
         expect(getDebuggerUrlStub.called).to.be.eq(true);
         expect(puppeteerConnectStub.calledWith({
@@ -122,29 +107,31 @@ describe("ContentDispatcher", () => {
     });
   });
 
-  describe("#dispatch", () => {
-    let dispatcher: ContentDispatcher;
+  describe("#inspect", () => {
+    context("when inspector hasn't been launched", () => {
+      it("should throw error if inspectorer has not been launched", async () => {
+        let caught: Error | undefined;
 
-    beforeEach(() => {
-      dispatcher = new ContentDispatcher(true);
-    });
+        try {
+          await inspector.inspect(`${MOCK_SERVER_BASE_URL}/redirection/http`);
+        } catch (e) {
+          caught = e;
+        }
 
-    context("when dispatcher hasn't been launched", () => {
-      it("should throw error if dispatcher has not been launched", async () => {
-        await expect(dispatcher.dispatch(`${MOCK_SERVER_BASE_URL}/redirection/http`)).to.be.rejectedWith(Error);
+        expect(caught).to.be.instanceOf(Error);
       });
     });
-    context("when dispatcher has been launched", () => {
+    context("when inspector has been launched", () => {
       beforeEach(async () => {
-        await dispatcher.launch();
+        await inspector.launch();
       });
 
       afterEach(async () => {
-        await dispatcher.shutdown();
+        await inspector.shutdown();
       });
 
-      it("should return dispatched content", async () => {
-        const content = await dispatcher.dispatch(`${MOCK_SERVER_BASE_URL}/redirection/http`);
+      it("should return inspected page", async () => {
+        const content = await inspector.inspect(`${MOCK_SERVER_BASE_URL}/redirection/http`);
 
         expect(content).to.be.deep.eq({
           navigatedUrls: [`${MOCK_SERVER_BASE_URL}/?${qs.stringify({ from: "/redirection/http" })}`],
@@ -153,8 +140,8 @@ describe("ContentDispatcher", () => {
         });
       });
 
-      it("should wait specified delay and return dispatched content", async () => {
-        const content = await dispatcher.dispatch(`${MOCK_SERVER_BASE_URL}/redirection/js`, 2000);
+      it("should wait specified delay and return inspected page", async () => {
+        const content = await inspector.inspect(`${MOCK_SERVER_BASE_URL}/redirection/js`, 2000);
 
         expect(content).to.be.deep.eq({
           navigatedUrls: [
@@ -169,26 +156,19 @@ describe("ContentDispatcher", () => {
   });
 
   describe("#shutdown", () => {
-    let dispatcher: ContentDispatcher;
     let closeStub: sinon.SinonStub;
 
-    const sandbox = sinon.sandbox.create();
-
     beforeEach(() => {
-      dispatcher = new ContentDispatcher();
+      inspector = new PageInspector();
 
       closeStub = sandbox.stub().resolves();
-      sandbox.stub((dispatcher as any), "browser").value({
+      sandbox.stub((inspector as any), "browser").value({
         close: closeStub,
       });
     });
 
-    afterEach(() => {
-      sandbox.restore();
-    });
-
     it("should shutdown puppeteer instance", async () => {
-      await dispatcher.shutdown();
+      await inspector.shutdown();
 
       expect(closeStub.calledOnce).to.be.eq(true);
     });
@@ -199,13 +179,13 @@ describe("ContentDispatcher", () => {
       beforeEach(() => {
         killStub = sandbox.stub().resolves();
 
-        sandbox.stub((dispatcher as any), "slsChrome").value({
+        sandbox.stub((inspector as any), "slsChrome").value({
           kill: killStub,
         });
       });
 
       it("should kill chrome process also", async () => {
-        await dispatcher.shutdown();
+        await inspector.shutdown();
 
         expect(killStub.called).to.be.eq(true);
       });
@@ -213,15 +193,13 @@ describe("ContentDispatcher", () => {
   });
 
   describe("#getDebuggerUrl", async () => {
-    let dispatcher: ContentDispatcher;
-
     const MOCK_DEBUGGER_HOST = "127.0.0.1";
     const MOCK_DEBUGGER_PORT = 1234;
     const MOCK_DEBUGGER_BASE_URL = `http://${MOCK_DEBUGGER_HOST}:${MOCK_DEBUGGER_PORT}`;
     const MOCK_DEBUGGER_WS_ENDPOINT = `ws://${MOCK_DEBUGGER_HOST}:${MOCK_DEBUGGER_PORT}/devtools/browser/12345678-1234`;
 
     beforeEach(() => {
-      dispatcher = new ContentDispatcher();
+      inspector = new PageInspector();
 
       nock(MOCK_DEBUGGER_BASE_URL)
         .get("/json/version")
@@ -235,7 +213,7 @@ describe("ContentDispatcher", () => {
     });
 
     it("should return debugger url", async () => {
-      const debuggerUrl = await (dispatcher as any).getDebuggerUrl(MOCK_DEBUGGER_BASE_URL);
+      const debuggerUrl = await (inspector as any).getDebuggerUrl(MOCK_DEBUGGER_BASE_URL);
 
       expect(debuggerUrl).to.be.eq(MOCK_DEBUGGER_WS_ENDPOINT);
     });

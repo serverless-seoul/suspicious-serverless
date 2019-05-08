@@ -6,8 +6,11 @@ import {
 } from "vingle-corgi";
 
 import * as Joi from "joi";
-import { ContentDispatcher } from "../../services/content_dispatcher";
+
+import { PageInspector } from "../../services/page_inspector";
 import { RedirectionResolver } from "../../services/redirection_resolver";
+
+const inspector = new PageInspector(!!process.env.DISABLE_SERVERLESS_CHROME);
 
 export const routes: Routes = [
   Route.GET(
@@ -28,23 +31,16 @@ export const routes: Routes = [
   ),
   Route.GET(
     "/content", {
-      desc: "Dispatch content of given url",
-      operationId: "dispatchContent",
+      desc: "Fetch content of given url",
+      operationId: "getContent",
     }, {
       url: Parameter.Query(Joi.string().required()),
     }, async function(this: RoutingContext) {
       const url = this.params.url as string;
 
-      // We can't re-use chrome instance now because currently serverless-chrome is not stable.
-      // launching new chrome process will cause additional processing time (approx. 600ms)
-      // @see https://github.com/adieuadieu/serverless-chrome/issues/41
-      const dispatcher = new ContentDispatcher(!!process.env.DISABLE_SERVERLESS_CHROME);
-
-      await dispatcher.launch();
-
-      const content = await dispatcher.dispatch(url, 3000);
-
-      await dispatcher.shutdown();
+      await inspector.launch();
+      const content = await inspector.inspect(url, 3000);
+      // await inspector.shutdown();
 
       return this.json({
         data: content,

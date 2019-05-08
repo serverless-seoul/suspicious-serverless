@@ -1,29 +1,19 @@
+import * as debug from "debug";
+import * as Linkify from "linkify-it";
 import * as _ from "lodash";
 import * as request from "request";
 import * as URL from "url";
-const linkify = require("linkify-it")(); // tslint:disable-line
 
-function linkifyMatch(text: string) {
-  const matchResult = linkify.match(text);
-  if (matchResult == null) {
-    return [];
-  } else {
-    return linkify.match(text) as Array<{
-      schema: string
-      index: number,
-      lastIndex: number,
-      raw: string,
-      text: string,
-      url: string,
-    }>;
-  }
-}
+const linkify = Linkify();
 
 export class RedirectionResolver {
+  private readonly LOG_TAG = "suspicious-serverless:redirection-resolver";
+  private log = debug(this.LOG_TAG);
+
   constructor(
     private timeout: number = 5000,
     // tslint:disable-next-line
-    private userAgent: string = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36",
+    private userAgent: string = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36",
   ) {}
 
   public async resolve(url: string) {
@@ -37,12 +27,14 @@ export class RedirectionResolver {
         const redirectionUrl = await this.getRedirectionUrl(_.last(urls)!);
 
         if (redirectionUrl) {
-          urls.push(...linkifyMatch(redirectionUrl).map((l) => l.url));
+          const matched = linkify.match(redirectionUrl) || [];
+          urls.push(...matched.map((l) => l.url));
         } else {
           break;
         }
         redirectCount++;
       } catch (e) {
+        this.log("failed to resolve redirection", e.stack);
         break;
       }
     }
@@ -50,37 +42,36 @@ export class RedirectionResolver {
     return _.uniq(urls);
   }
 
-  private async getRedirectionUrl(url: string) {
+  public async getRedirectionUrl(url: string): Promise<string | null> {
     return new Promise((resolve, reject) => {
       const req = request({
-        method: "GET",
-        url,
-        headers: {
-          "User-Agent": this.userAgent,
-        },
-        followRedirect: false,
-        timeout: this.timeout,
-      }).on("error", (e) => {
-        clearTimeout(timerId);
-        req.removeAllListeners(); // clean up event listeners
+          method: "GET",
+          url,
+          headers: {
+            "User-Agent": this.userAgent,
+          },
+          followRedirect: false,
+          timeout: this.timeout,
+        })
+        .on("error", onError)
+        .on("response", onResponse); // we only need to read response headers
+
+      function onError(e: Error) {
+        req.removeListener("response", onResponse);
 
         reject(e);
-      }).on("response", (res) => { // we only need to read response headers
-        clearTimeout(timerId);
-        req.removeAllListeners(); // clean up event listeners
+      }
+
+      function onResponse(res: request.Response) {
+        req.removeListener("error", onError);
         req.abort(); // stop receiving response body
 
-        if (res.statusCode! >= 300 && res.statusCode! < 400) {
-          return resolve(URL.resolve(url, res.headers.location));
+        if (res.statusCode! >= 300 && res.statusCode! < 400 && res.headers.location) {
+          return resolve(URL.resolve(url, res.headers.location!));
         }
 
-        resolve();
-      });
-
-      const timerId = setTimeout(() => {
-        req.abort();
-        reject(new Error(`reached read timeout ${this.timeout}ms`));
-      }, this.timeout);
-    }) as Promise<string>;
+        resolve(null);
+      }
+    });
   }
 }

@@ -21,8 +21,9 @@ custom:
 
 functions:
   api:
-    handler: api.handler
+    handler: src/api/index.handler
     timeout: 120
+    memorySize: 1024
     events:
       - http:
           path: /{proxy+}

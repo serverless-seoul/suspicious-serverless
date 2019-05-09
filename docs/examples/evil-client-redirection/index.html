@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Evil Client-side redirection</title>
+</head>
+<body>
+<p>
+  Please wait...
+</p>
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+      location.href = './redirected-page.html';
+    }, 1000);
+  });
+</script>
+</body>
+</html>

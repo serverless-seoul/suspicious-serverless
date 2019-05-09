@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Evil Client-side redirection</title>
+</head>
+<body>
+<p>
+  Please wait a moment to get prize, This is limited time offer!
+</p>
+<script type="text/javascript">
+  window.onload = () => {
+    const evilLink = '<a href="https://evil-website.com/payment" target="_blank">Click me to get free iPhone X!</a>';
+    document.body.innerHTML += evilLink;
+  };
+</script>
+</body>
+</html>

@@ -10,6 +10,7 @@
 import { ChildProcess, spawn } from "child_process";
 import debug from "debug";
 import * as net from "net";
+import * as path from "path";
 
 const DEFAULT_CHROME_FLAGS = new Set<string>([
   "--disable-dev-shm-usage", // disable /dev/shm tmpfs usage on Lambda
@@ -24,7 +25,11 @@ const DEFAULT_CHROME_FLAGS = new Set<string>([
   "--no-sandbox",
 ]);
 
-const CHROME_PATH = require.resolve("@serverless-chrome/lambda/dist/headless-chromium");
+// @todo FIX this nasty path resolving
+const CHROME_PATH = path.join(
+  process.cwd(),
+  "node_modules/@serverless-chrome/lambda/dist/headless-chromium",
+);
 
 export interface LauncherOptions {
   pollInterval?: number;

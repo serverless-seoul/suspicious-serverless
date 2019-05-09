@@ -14,6 +14,8 @@ plugins:
 custom:
   webpack:
     includeModules:
+      forceInclude:
+        - "@serverless-chrome/lambda"
       forceExclude:
         - aws-sdk
   prune:

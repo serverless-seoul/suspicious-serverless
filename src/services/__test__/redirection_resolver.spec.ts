@@ -1,14 +1,11 @@
-import * as chai from "chai";
-import * as chaiAsPromised from "chai-as-promised";
+import { expect } from "chai";
 import * as nock from "nock";
-
-chai.use(chaiAsPromised);
-// chai.should();
-const expect = chai.expect;
 
 import { RedirectionResolver } from "../redirection_resolver";
 
-describe("RedirectionResolver", () => {
+describe(RedirectionResolver.name, () => {
+  let resolver: RedirectionResolver;
+
   beforeEach(() => {
     nock("http://200.response.com")
       .get(/.+/)
@@ -41,60 +38,73 @@ describe("RedirectionResolver", () => {
         Location: "https://www.facebook.com",
       });
 
+    nock("http://such.blocked.request.com")
+      .get(/.+/)
+      .delayConnection(7000)
+      .reply(302, "Moved Temporarily", {
+        Location: "https://www.facebook.com",
+      });
+
     nock("http://such.slow.response.com")
       .get(/.+/)
       .delay({ head: 7000, body: 7000 })
       .reply(302, "Moved Temporarily", {
         Location: "https://www.facebook.com",
       });
+
+    resolver = new RedirectionResolver();
   });
 
   afterEach(() => {
     nock.cleanAll();
   });
 
-  describe("._getRedirectionUrl", () => {
-    let resolver: any; // for access to private methods
-
-    beforeEach(() => {
-      resolver = new RedirectionResolver();
-    });
-
-    it("should return nothing if server respond with non-3xx status code", async () => {
-      expect(await (resolver as any).getRedirectionUrl("http://200.response.com/0x1234")).to.be.eq(undefined);
-      expect(await (resolver as any).getRedirectionUrl("http://404.response.com/a.bc.1/e")).to.be.eq(undefined);
-      expect(await (resolver as any).getRedirectionUrl("http://502.response.com/foo/bar.baz")).to.be.eq(undefined);
+  describe(".getRedirectionUrl", () => {
+    it("should return null if server respond with non-3xx status code", async () => {
+      expect(await resolver.getRedirectionUrl("http://200.response.com/0x1234")).to.be.eq(null);
+      expect(await resolver.getRedirectionUrl("http://404.response.com/a.bc.1/e")).to.be.eq(null);
+      expect(await resolver.getRedirectionUrl("http://502.response.com/foo/bar.baz")).to.be.eq(null);
     });
 
     it("should return redirection url if server respond with 3xx status code", async () => {
-      expect(await (resolver as any).getRedirectionUrl("http://301.response.com/0xffff"))
+      expect(await resolver.getRedirectionUrl("http://301.response.com/0xffff"))
         .to.be.eq("https://www.twitter.com/foo");
-      expect(await (resolver as any).getRedirectionUrl("http://302.response.com/watch-out-facebook"))
+      expect(await resolver.getRedirectionUrl("http://302.response.com/watch-out-facebook"))
         .to.be.eq("https://www.facebook.com/");
     });
 
     it("should throw error on read timeout (socket connected, but slow response)", async () => {
-      expect((resolver as any).getRedirectionUrl("http://such.slow.response.com/some/path"))
-        .to.be.rejectedWith(Error);
+      let caught: Error | undefined;
+
+      try {
+        await resolver.getRedirectionUrl("http://such.slow.response.com/some/path");
+      } catch (e) {
+        caught = e;
+      }
+
+      expect(caught).to.be.instanceOf(Error);
     });
 
     it("should throw error on connect timeout (socket connect timeout)", async () => {
-      expect((resolver as any).getRedirectionUrl("http://such.stuck.request.com/foo/bar.baz"))
-        .to.be.rejectedWith(Error);
+      let caught: Error | undefined;
+
+      try {
+        await resolver.getRedirectionUrl("http://such.stuck.request.com/foo/bar.baz");
+      } catch (e) {
+        caught = e;
+      }
+
+      expect(caught).to.be.instanceOf(Error);
     });
 
     it("should ignore response body to prevent DoS attacks", async () => {
       // tslint:disable-next-line
-      expect(await (resolver as any).getRedirectionUrl("http://download.blender.org/peach/bigbuckbunny_movies/big_buck_bunny_720p_h264.mov")).to.be.eq(undefined);
+      expect(await resolver.getRedirectionUrl("https://download.blender.org/peach/bigbuckbunny_movies/big_buck_bunny_720p_h264.mov")).to.be.eq(null);
     });
   });
 
   describe(".resolve", () => {
-    let resolver: RedirectionResolver; // for access to private methods
-
     beforeEach(() => {
-      resolver = new RedirectionResolver();
-
       nock("http://click.gl")
         .get("/L8NUWG")
         .reply(302, "Moved Temporarily", {
@@ -139,10 +149,6 @@ describe("RedirectionResolver", () => {
         });
     });
 
-    afterEach(() => {
-      nock.cleanAll();
-    });
-
     it("should return redirect chain", async () => {
       const urls = await resolver.resolve("http://click.gl/L8NUWG");
       expect(urls).to.be.deep.eq([
@@ -168,6 +174,14 @@ describe("RedirectionResolver", () => {
 
       expect(urls).to.be.deep.eq([
         "http://such.stuck.request.com/foo/bar.baz",
+      ]);
+    });
+
+    it("should handle connect timeout (dns query timeout)", async () => {
+      const urls = await resolver.resolve("http://www.vingle.net:81/hello");
+
+      expect(urls).to.be.deep.eq([
+        "http://www.vingle.net:81/hello",
       ]);
     });
   });

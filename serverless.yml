@@ -2,19 +2,29 @@ service: suspicious-serverless
 
 provider:
   name: aws
-  runtime: nodejs6.10
+  runtime: nodejs8.10
   stage: prod
+  logRetentionInDays: 30
 
 plugins:
   - serverless-webpack
+  - serverless-prune-plugin
+  - "@vingle/serverless-tag-plugin"
 
 custom:
-  webpackIncludeModules: true
+  webpack:
+    includeModules:
+      forceExclude:
+        - aws-sdk
+    prune:
+      automatic: true
+      number: 5
 
 functions:
   api:
-    handler: api.handler
+    handler: src/api/index.handler
     timeout: 120
+    memorySize: 1024
     events:
       - http:
           path: /{proxy+}

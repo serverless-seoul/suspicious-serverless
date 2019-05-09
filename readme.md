@@ -2,12 +2,15 @@
 
 ## Business Domain
 
-A collection of utilities for analyze suspicious content, using Serverless Framework.
+A collection of utilities for analyzing suspicious content, using Serverless Framework.
 
 
 ## Responsibility
 
 - Resolve redirection chain (urls) from given url
+- Inspect page content from given url
+  - Detect client-side page redirection
+  - Detect client-side page rendering (e.g. React app)
 
 
 ## Usage
@@ -33,4 +36,27 @@ Content-Type: application/json; charset=utf8
 ["https://vingle.net", "https://www.vingle.net/"]
 ```
 
+
+## Getting started
+
+## Deploy
+
+```bash
+$ npm run deploy:stage # for staging 
+$ npm run deploy:prod # for production 
+```
+
+## Testing
+
+```bash
+$ npm run test
+```
+
+## Debugging
+
+To see debug logs, Set `DEBUG` environment variable to `suspicious-serverless*`.
+
+
 ## Maintainer
+
+[MooYeol Prescott Lee (@mooyoul)](https://github.com/mooyoul)

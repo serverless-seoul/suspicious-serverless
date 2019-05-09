@@ -1,35 +1,33 @@
+'use strict';
+
 const path = require('path');
+const slsw = require('serverless-webpack');
 
 module.exports = {
-  entry: './src/api',
+  entry: slsw.lib.entries,
   target: 'node',
-  resolve: {
-    alias: {
-      // @note This alias is required if building service on Node.js > v6,
-      // because webpack tree shaking drops built-in runtime check logic in puppeteer package
-      "puppeteer": require.resolve("puppeteer/node6/Puppeteer")
-    },
-    extensions: [
-      '.js',
-      '.json',
-      '.ts',
-      '.tsx'
-    ]
-  },
-  output: {
-    libraryTarget: 'commonjs',
-    path: path.join(__dirname, '.webpack'),
-    filename: 'api.js'
+  mode: slsw.lib.webpack.isLocal ? 'development' : 'production',
+  optimization: {
+    minimize: false
   },
   module: {
-    loaders: [
-      { test: /\.ts$/, loader: 'ts-loader' }
-    ]
+    rules: [
+      {
+        test: /\.ts$/,
+        use: [{ loader: 'ts-loader' }],
+      },
+    ],
   },
-  externals: [
-    'aws-sdk',
-    // @note `@serverless-chrome/lambda` package has extra built chromium binary,
-    // which is specially to be handled
-    '@serverless-chrome/lambda'
-  ]
+  resolve: {
+    extensions: ['.ts', '.js', '.json'],
+    alias: {
+      puppeteer: require.resolve("puppeteer/lib/Puppeteer"),
+    },
+  },
+  output: {
+    libraryTarget: 'commonjs2',
+    path: path.join(__dirname, '.webpack'),
+    filename: '[name].js', // this should match the first part of function handler in serverless.yml
+  },
+  externals: ['aws-sdk', '@serverless-chrome/lambda', 'puppeteer'],
 };

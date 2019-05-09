@@ -14,6 +14,9 @@ const router = new Router([
 
   new Namespace("", {
     children: routes,
+    async exceptionHandler(e) {
+      console.error(e.stack); // tslint:disable-line
+    },
   }),
 ]);
 

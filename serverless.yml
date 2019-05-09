@@ -16,9 +16,9 @@ custom:
     includeModules:
       forceExclude:
         - aws-sdk
-    prune:
-      automatic: true
-      number: 5
+  prune:
+    automatic: true
+    number: 5
 
 functions:
   api:

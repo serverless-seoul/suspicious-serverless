@@ -13,7 +13,7 @@
     "info:prod": "sls info -s prod"
   },
   "engines": {
-    "node": "6.10.*"
+    "node": "6.17.*"
   },
   "author": "MooYeol Lee <mooyoul@gmail.com>",
   "license": "ISC",

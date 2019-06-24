@@ -22,7 +22,7 @@
     "@types/chai": "4.1.7",
     "@types/debug": "4.1.4",
     "@types/linkify-it": "2.1.0",
-    "@types/lodash": "4.14.124",
+    "@types/lodash": "4.14.134",
     "@types/mocha": "5.2.6",
     "@types/nock": "10.0.2",
     "@types/node": "8.10.49",

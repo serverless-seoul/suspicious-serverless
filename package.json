@@ -18,7 +18,7 @@
   "author": "MooYeol Lee <mooyoul@gmail.com>",
   "license": "ISC",
   "devDependencies": {
-    "@types/bluebird": "3.5.26",
+    "@types/bluebird": "3.5.27",
     "@types/chai": "4.1.7",
     "@types/debug": "4.1.4",
     "@types/linkify-it": "2.1.0",

@@ -39,7 +39,7 @@
     "sinon": "7.3.2",
     "ts-loader": "6.0.4",
     "ts-node": "8.3.0",
-    "tslint": "5.16.0",
+    "tslint": "5.18.0",
     "typescript": "3.5.2",
     "webpack": "4.31.0"
   },

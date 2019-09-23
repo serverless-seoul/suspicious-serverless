@@ -19,7 +19,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/bluebird": "3.5.27",
-    "@types/chai": "4.1.7",
+    "@types/chai": "4.2.3",
     "@types/debug": "4.1.4",
     "@types/linkify-it": "2.1.0",
     "@types/lodash": "4.14.134",

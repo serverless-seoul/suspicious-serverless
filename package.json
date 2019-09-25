@@ -33,7 +33,7 @@
     "chai": "4.2.0",
     "mocha": "6.2.0",
     "nock": "10.0.6",
-    "serverless": "1.52.2",
+    "serverless": "1.53.0",
     "serverless-prune-plugin": "1.4.1",
     "serverless-webpack": "5.3.1",
     "sinon": "7.5.0",

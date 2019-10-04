@@ -28,7 +28,7 @@
     "@types/node": "8.10.54",
     "@types/puppeteer": "1.20.1",
     "@types/request": "2.48.3",
-    "@types/sinon": "7.0.13",
+    "@types/sinon": "7.5.0",
     "@vingle/serverless-tag-plugin": "1.1.2",
     "chai": "4.2.0",
     "mocha": "6.2.1",

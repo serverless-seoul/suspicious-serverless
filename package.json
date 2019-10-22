@@ -51,6 +51,6 @@
     "lodash": "^4.17.11",
     "puppeteer": "~1.20.0",
     "request": "^2.88.0",
-    "vingle-corgi": "^2.1.0"
+    "vingle-corgi": "^3.0.0"
   }
 }
